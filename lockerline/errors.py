@@ -13,7 +13,7 @@ class DomainError(Exception):
 
 
 class NoSuchTower(DomainError):
-    status, type, title = 404, "/errors/no-such-tower", "No such door"  # Wait, let's keep exact step 5.3 specifications: NoSuchTower title is "No such tower"
+    status, type, title = 404, "/errors/no-such-tower", "No such tower"
 
 
 class NoSuchDoor(DomainError):
@@ -39,3 +39,9 @@ class NoDoorFree(DomainError):
     status, type, title = 409, "/errors/no-door-free", "No free door of that size" 
 
 
+class NoSuchCode(DomainError):
+    status, type, title = 404, "/errors/no-such-code", "No such code"
+
+
+class CodeExpired(DomainError):
+    status, type, title = 404, "/errors/code-expired", "This code has expired"
