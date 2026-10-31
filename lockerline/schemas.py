@@ -1,5 +1,4 @@
 """Request and response models. Every response goes through one of these. Optional fields are left out."""
-
 from datetime import datetime, timezone
 from typing import Annotated, Literal, Optional
 
@@ -50,6 +49,8 @@ class DropOut(BaseModel):
     size_class: SizeClass
     flat: str
     dropped_at: UtcZ
+    code: str = Field(description="Shown once, to the courier")
+    expires_at: UtcZ
 
 
 class ParcelOut(BaseModel):
@@ -59,5 +60,3 @@ class ParcelOut(BaseModel):
     size_class: SizeClass
     flat: str
     dropped_at: UtcZ
-
-    
