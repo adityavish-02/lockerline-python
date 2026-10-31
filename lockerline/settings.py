@@ -16,3 +16,7 @@ class Settings(BaseSettings):
     seed_dir: str = Field("seed", min_length=1)
     host: str = Field("0.0.0.0", min_length=1)               # the address uvicorn binds
     port: int = Field(8080, ge=1, le=65535)
+
+
+def get_settings() -> Settings:
+    return Settings()
