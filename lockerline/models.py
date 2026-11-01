@@ -1,7 +1,9 @@
 """Tables. A door's state is derived from current_parcel_id; there is deliberately no `state` column"""
+
+
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -22,7 +24,7 @@ class Door(Base):
     tower_id: Mapped[int] = mapped_column(ForeignKey("towers.id"))
     no: Mapped[str] = mapped_column(String(8))
     size_class: Mapped[str] = mapped_column(String(1))  # S | M | L
-    current_parcel_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    current_parcel_id: Mapped[int | None] = mapped_column(Integer, ForeignKey("parcels.id"), nullable=True)
 
 
 class Resident(Base):
@@ -48,3 +50,14 @@ class Parcel(Base):
     code_hash: Mapped[str] = mapped_column(String(64))
     code_expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     code_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class Event(Base):
+    """One row per transition, written in the same transaction as the change. Insert only."""
+    __tablename__ = "events"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tower_id: Mapped[int] = mapped_column(ForeignKey("towers.id"))
+    parcel_id: Mapped[int] = mapped_column(ForeignKey("parcels.id"))
+    kind: Mapped[str] = mapped_column(String(16))                                            # dropped | code_issued | opened
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    data: Mapped[str] = mapped_column(Text, default="{}")                                    # JSON: ids and facts, never the code or a name

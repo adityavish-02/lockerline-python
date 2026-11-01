@@ -6,6 +6,7 @@ from ..clock import Clock, as_utc
 from ..errors import CodeExpired, CodeUsed, NoSuchCode
 from ..models import Door, Parcel
 from ..settings import Settings
+from . import events
 from .codes import hash_code, matches
 
 
@@ -28,11 +29,9 @@ def pickup(session: Session, code: str, clock: Clock, settings: Settings) -> tup
 
   if parcel.code_used_at is not None:
     raise CodeUsed("That code has already opened its door")
-
   now = clock.now()
   if now > as_utc(parcel.code_expires_at):
     raise CodeExpired("That code's window has passed")
-
   door = session.get(Door, parcel.door_id)
   dwell = int((now - as_utc(parcel.dropped_at)).total_seconds())
   parcel.state = "collected"
@@ -40,5 +39,6 @@ def pickup(session: Session, code: str, clock: Clock, settings: Settings) -> tup
   parcel.dwell_seconds = dwell
   parcel.code_used_at = now
   door.current_parcel_id = None
+  events.record(session, parcel.tower_id, parcel.id, "opened", now, {"door": door.no, "dwell_seconds": dwell})
   session.commit()
   return parcel, door
