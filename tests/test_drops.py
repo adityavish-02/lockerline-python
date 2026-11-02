@@ -9,7 +9,7 @@ from tests.conftest import drop, fill
 def test_drop_takes_lowest_free_door_of_exact_size(client, db):
     body = drop(client, "M", "302")
     assert body["door"] == "D21" and body["size_class"] == "M" and body["flat"] == "302"
-    assert body["parcel_id"].startswith("P") and body["dropped_at"] == "2026-09-25T13:10:00Z"      # the clock, in UTC with a Z
+    assert body["parcel_id"].startswith("P") and body["dropped_at"] == "2026-09-25T13:10:00Z"  # the clock, in UTC with a Z
     assert client.get(f"/parcels/{body['parcel_id']}").json()["dropped_at"] == "2026-09-25T13:10:00Z"  # re-read from SQLite: still UTC, not local time
 
     with db() as s:
@@ -59,3 +59,10 @@ def test_failure_after_parcel_insert_rolls_everything_back(client, db):
     with db() as s:
         assert s.scalar(select(func.count()).select_from(Parcel)) == 0
         assert s.scalar(select(Door).where(Door.no == "D21")).current_parcel_id is None
+
+
+def test_location_header_is_documented_on_the_201(client):
+    created = client.get("/openapi.json").json()["paths"]["/drops"]["post"]["responses"]["201"]
+
+    assert created["headers"]["Location"]["schema"] == {"type": "string"}
+    assert created["headers"]["Location"]["description"]

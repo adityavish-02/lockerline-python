@@ -1,4 +1,4 @@
-"""Routes parse and delegate; they hold no rules. The request-scoped dependencies (session, clock, settings) are defined here."""
+"""One router per resource. Routes parse and delegate; they hold no rules. The request-scoped dependencies (session, clock, settings) are defined here."""
 from typing import Annotated
 
 from fastapi import Depends, Request
