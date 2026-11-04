@@ -1,5 +1,6 @@
 """Health answers when the process is up and can reach its database; the Dockerfile is the one the ticket names
 and it keeps that contract. (docker build and run themselves are checked by hand: see the README.)"""
+
 import re
 
 from lockerline.db import get_session, make_engine, make_sessionmaker
@@ -39,5 +40,6 @@ def test_dockerfile_matches_the_contract():
 
     assert "RUN pip install --no-cache-dir -r requirements.lock" in text
     assert re.search(r"ENV HOST=0\.0\.0\.0 \\\n\s+PORT=8080 \\", text)
+    assert "DATABASE_URL" not in text, "the env-file carries the database path; nothing else is baked in"
     assert 'CMD ["sh", "-c", "exec uvicorn lockerline.app:app --host \\"$HOST\\" --port \\"$PORT\\""]' in text
-    assert "EXPOSE 8080" in text
+    assert 'VOLUME ["/data"]' in text and "EXPOSE 8080" in text
